@@ -1,0 +1,14 @@
+version: "2.0"
+rules:
+- rule: submit user details
+  condition:
+  - active_loop: user_details_form
+  steps:
+  - action: user_details_form
+  - active_loop: null
+  - slot_was_set:
+      - requested_slot: null
+  - action: action_save_user
+  - slot_was_set:
+      - is_existing_user: true
+  - action: utter_how_is_your_day

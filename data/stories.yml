@@ -1,0 +1,30 @@
+version: "2.0"
+stories:
+- story: beginning of flow
+  steps:
+  - intent: greet
+  - action: action_existing_user
+  - checkpoint: check_existing_user
+
+- story: handle existing user
+  steps:
+  - checkpoint: check_existing_user
+  - slot_was_set:
+    - is_existing_user: true
+  - action: utter_how_is_your_day
+
+- story: handle new user
+  steps:
+  - checkpoint: check_existing_user
+  - slot_was_set:
+    - is_existing_user: false
+  - action: utter_new_user
+  - action: user_details_form
+  - active_loop: user_details_form
+
+- story: handle confirm emergency contact
+  steps:
+  - checkpoint: check_emergency_contact_confirmation
+  - intent: affirm
+  - action: user_details_form
+  - active_loop: user_details_form

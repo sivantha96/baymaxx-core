@@ -1,0 +1,79 @@
+version: "2.0"
+nlu:
+- intent: greet
+  examples: |
+    - Hi
+    - Hey!
+    - Hallo
+    - Good day
+    - Good morning
+    - Good evening
+    - Good afternoon
+    - hi
+- intent: bye
+  examples: |
+    - Bye
+    - See you
+- intent: help
+  examples: |
+    - I am having a panic attack
+    - I am having an emergency
+    - Help
+    - Please help
+    - I am having trouble
+    - I can't breathe
+    - Help me
+    - help
+- intent: inform_name
+  examples: |
+    - My name is [John Doe](name)
+    - [John Doe](name)
+    - The name is [John Doe](name)
+    - I am [John Doe](name)
+    - My name is [sivantha](name)
+    - [sivantha](name)
+    - my name is [sivantha](name)
+    - [Sivantha](name)
+    - My name is [Sivantha](name)
+- intent: inform_age
+  examples: |
+    - I am [20](age) years old
+    - [20](age)
+    - [20](age) years
+    - I am [20](age)
+    - [16](age)
+- intent: inform_gender
+  examples: |
+    - I am a [male](gender)
+    - I am a [female](gender)
+    - [male](gender)
+    - [female](gender)
+    - [Male](gender)
+- intent: affirm
+  examples: |
+    - Yes
+    - Yeah
+    - Sure
+    - Of course
+    - Let's go
+    - Yeah sure
+    - Yes sure
+    - Sure thing
+    - Yes please
+    - Yup
+- intent: deny
+  examples: |
+    - No
+    - Nah
+    - Nope
+    - Not at the moment
+    - Not right now
+    - I don't think so
+- intent: bad
+  examples: |
+    - Terrible
+    - Bad
+    - Awful
+    - Oh it was awful
+    - It was not good
+    - Not good

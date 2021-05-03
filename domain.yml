@@ -1,0 +1,89 @@
+version: '2.0'
+config:
+  store_entities_as_slots: true
+session_config:
+  session_expiration_time: 60
+  carry_over_slots_to_new_session: true
+intents:
+- greet:
+    use_entities: true
+- bye:
+    use_entities: true
+- help:
+    use_entities: true
+- inform_name:
+    use_entities: true
+- inform_age:
+    use_entities: true
+- inform_gender:
+    use_entities: true
+- affirm:
+    use_entities: true
+- deny:
+    use_entities: true
+- bad:
+    use_entities: true
+entities:
+- age
+- gender
+- name
+slots:
+  age:
+    type: rasa.shared.core.slots.TextSlot
+    initial_value: null
+    auto_fill: true
+    influence_conversation: false
+  gender:
+    type: rasa.shared.core.slots.TextSlot
+    initial_value: null
+    auto_fill: true
+    influence_conversation: false
+  name:
+    type: rasa.shared.core.slots.TextSlot
+    initial_value: null
+    auto_fill: true
+    influence_conversation: false
+  is_existing_user:
+    type: rasa.shared.core.slots.BooleanSlot
+    initial_value: null
+    auto_fill: true
+    influence_conversation: true
+  requested_slot:
+    type: rasa.shared.core.slots.UnfeaturizedSlot
+    initial_value: null
+    auto_fill: true
+    influence_conversation: false
+responses:
+  utter_greet:
+  - text: Hello! I am Baymaxx. Your personal healthcare assistant.
+  - text: Hi! I am Baymaxx. Your personal healthcare assistant
+  utter_ask_name:
+  - text: What is your name?
+  utter_ask_age:
+  - text: What is your age?
+  utter_ask_gender:
+  - text: What is your gender?
+  utter_bye:
+  - text: Bye
+  utter_new_user:
+  - text: I have not seen you before.
+  utter_how_is_your_day:
+  - text: So, how is your day?
+actions:
+- action_existing_user
+- action_save_user
+forms:
+  user_details_form:
+    age:
+    - entity: age
+      intent: inform_age
+      type: from_entity
+    gender:
+    - entity: gender
+      intent: inform_gender
+      type: from_entity
+    name:
+    - entity: name
+      intent: inform_name
+      type: from_entity
+e2e_actions: []
