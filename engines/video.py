@@ -1,7 +1,5 @@
 import cv2
 import face_recognition
-import pymongo
-import numpy as np
 
 
 class Video:

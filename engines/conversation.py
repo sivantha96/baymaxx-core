@@ -4,9 +4,7 @@ import os
 import json
 from collections import namedtuple
 import pyttsx3
-import time
 import requests
-from multiprocessing import Process, Value
 from threading import Thread
 
 import speech_recognition as sr

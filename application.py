@@ -1,5 +1,7 @@
+import os
 from multiprocessing import Process, Value
 from threading import Thread
+
 from engines.conversation import Conversation
 from engines.video import Video
 from engines.control import Control
@@ -7,9 +9,9 @@ from engines.control import Control
 from flask import Flask
 from flask_pymongo import PyMongo
 
+
 application = Flask(__name__)
-application.config[
-    "MONGO_URI"] = "mongodb+srv://admin:anFQ48fadilTEqGa@cluster0.kamtz.mongodb.net/baymaxx?retryWrites=true&w=majority"
+application.config["MONGO_URI"] = os.getenv('DB_HOST')
 mongo = PyMongo(application)
 
 conversation = Conversation(mongo)
