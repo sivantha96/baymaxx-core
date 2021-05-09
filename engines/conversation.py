@@ -1,4 +1,6 @@
 import json
+import time
+
 import vosk
 import pyttsx3
 import requests
@@ -49,6 +51,7 @@ class Conversation:
         print("Conversation Engine configured")
 
     def start_listening(self):
+        time.sleep(60)
         print('listening...')
 
         with sd.RawInputStream(samplerate=sample_rate, blocksize=CHUNK, device=device, dtype='int16',
@@ -59,13 +62,17 @@ class Conversation:
                 if self.recognizer.AcceptWaveform(data):
                     result = json.loads(self.recognizer.Result())
                     if len(result['text']):
-                        payload = {'message': result['text']}
-                        responses = requests.post('http://localhost:5000/chat',
+                        print('User -', result['text'])
+                        payload = {'user': "unknown", 'message': result['text']}
+                        responses = requests.post(Environment.RASA_CHATBOT_WEBHOOK,
                                                   data=json.dumps(payload)).json()
                         if len(responses) != 0:
                             for res in responses:
                                 if len(res['text']) != 0:
                                     print("Chatbot - ", res['text'])
+
+                                    pyttsx3.say(res['text'])
+                            self.voice_engine.runAndWait()
 
     def start(self):
         rasa_server = Thread(target=start_rasa_server)

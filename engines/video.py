@@ -28,22 +28,23 @@ class Video:
         else:
             return 'unknown'
 
-    # def start_checking_for_changes(self):
-    #     while True:
-    #         time.sleep(2)
-    #         recognized_face = self.mongo.db.faces.find_one({"name": "recognized_face"})
-    #         current_face = self.mongo.db.faces.find_one({"name": "current_face"})
-    #         if recognized_face is None:
-    #             if current_face is not None:
-    #                 self.mongo.db.faces.update_one({"name": 'recognized_face'},
-    #                                                {"$set": {"encoding": current_face['encoding']}},
-    #                                                True)
-    #         else:
-    #             matches = face_recognition.compare_faces([np.fromiter(recognized_face['encoding'], dtype=float)], np.fromiter(current_face['encoding'], dtype=float))
-    #             print(matches[0] == True)
-    #
-    #
-    #         print(current_face)
+    def start_checking_for_changes(self):
+        test = {}
+        while True:
+            time.sleep(1)
+            recognized_face = self.mongo.db.faces.find_one({"name": "recognized_face"})
+            current_face = self.mongo.db.faces.find_one({"name": "current_face"})
+            if recognized_face is None:
+                if current_face is not None:
+                    self.mongo.db.faces.update_one({"name": 'recognized_face'},
+                                                   {"$set": {"encoding": current_face['encoding']}},
+                                                   True)
+            else:
+                matches = face_recognition.compare_faces([np.fromiter(recognized_face['encoding'], dtype=float)], np.fromiter(current_face['encoding'], dtype=float))
+                print(matches[0] == True)
+
+
+            print(current_face)
 
     def start_scanning_faces(self):
         vid = cv2.VideoCapture(0)
