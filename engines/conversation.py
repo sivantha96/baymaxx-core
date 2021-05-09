@@ -1,85 +1,73 @@
-from vosk import Model, KaldiRecognizer
-import pyaudio
-import os
 import json
-from collections import namedtuple
+import vosk
 import pyttsx3
 import requests
 from threading import Thread
+import os
+import queue
+import sounddevice as sd
+import sys
 
-import speech_recognition as sr
+from environment import Environment
 
 CHUNK = 8000  # number of data points to read at a time
-RATE = 44100  # time resolution of the recording device (Hz)
+
+device_info = sd.query_devices(sd.default.device, 'input')
+sample_rate = int(device_info['default_samplerate'])  # sample rate of the microphone
+device = sd.default.device  # microphone device
+rawAudioQueue = queue.Queue()  # queue to hold raw audio chunks
 
 
-def speech_callback(recognizer, audio):
-    print("speech callback called")
-    try:
-        print("Google Speech Recognition thinks you said " + recognizer.recognize_google(audio))
-    except sr.UnknownValueError:
-        print("Google Speech Recognition could not understand audio")
-    except sr.RequestError as e:
-        print("Could not request results from Google Speech Recognition service; {0}".format(e))
+# callback to save each audio chunk in a queue
+def callback(indata, frames, time, status):
+    if status:
+        print(status, file=sys.stderr)
+    rawAudioQueue.put(bytes(indata))
 
 
+# rasa chatbot server
 def start_rasa_server():
     os.system("rasa run")
 
 
+# rasa action server
 def start_rasa_action_server():
     os.system("rasa run actions")
 
 
 class Conversation:
     def __init__(self, mongo):
+        if not os.path.exists("model"):
+            print("Please download a model for your language from https://alphacephei.com/vosk/models")
+            print("and unpack as 'model' in the root folder.")
+
+        model = vosk.Model("model")
 
         self.mongo = mongo
-        self.r = sr.Recognizer()
-        self.m = sr.Microphone()
-        self.stop_listening = lambda: None
-
-        self.recognizer = KaldiRecognizer(Model("model"), 16000)
+        self.recognizer = vosk.KaldiRecognizer(model, sample_rate)
         self.voice_engine = pyttsx3.init()
-        self.stream = pyaudio.PyAudio().open(format=pyaudio.paInt16, channels=1, rate=RATE, input=True,
-                                             frames_per_buffer=CHUNK)  # uses default input device
         print("Conversation Engine configured")
-
-    def custom_object_decoder(dict):
-        return namedtuple('X', dict.keys())(*dict.values())
 
     def start_listening(self):
         print('listening...')
 
-        while True:
-            print('.', end="")
-            data = self.stream.read(CHUNK)
-            if len(data) == 0:
-                break
-            if self.recognizer.AcceptWaveform(data):
-                result = json.loads(self.recognizer.Result())
-                if len(result['text']) == 0:
-                    pass
-                else:
-                    print(result['text'])
-                    payload = {'sender': '1234dsdsd', 'message': result['text']}
-                    responses = requests.post('http://localhost:5005/webhooks/rest/webhook',
-                                             data=json.dumps(payload)).json()
-                    if len(responses) != 0:
-                        for res in responses:
-                            if len(res['text']) != 0:
-                                self.voice_engine.say(res['text'])
-                                self.voice_engine.runAndWait()
+        with sd.RawInputStream(samplerate=sample_rate, blocksize=CHUNK, device=device, dtype='int16',
+                               channels=1, callback=callback):
 
-
-
-                    print('done')
+            while True:
+                data = rawAudioQueue.get()
+                if self.recognizer.AcceptWaveform(data):
+                    result = json.loads(self.recognizer.Result())
+                    if len(result['text']):
+                        payload = {'message': result['text']}
+                        responses = requests.post('http://localhost:5000/chat',
+                                                  data=json.dumps(payload)).json()
+                        if len(responses) != 0:
+                            for res in responses:
+                                if len(res['text']) != 0:
+                                    print("Chatbot - ", res['text'])
 
     def start(self):
-        print("Conversation Engine started")
-        # with self.m as source:
-        #     self.r.adjust_for_ambient_noise(source)  # we only need to calibrate once, before we start listening
-        # self.stop_listening = self.r.listen_in_background(self.m, speech_callback)
         rasa_server = Thread(target=start_rasa_server)
         rasa_action_server = Thread(target=start_rasa_action_server)
         listener = Thread(target=self.start_listening)
@@ -91,3 +79,4 @@ class Conversation:
         rasa_server.join()
         rasa_action_server.join()
         listener.join()
+        print("Conversation Engine started")

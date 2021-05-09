@@ -6,12 +6,13 @@ from engines.conversation import Conversation
 from engines.video import Video
 from engines.control import Control
 
-from flask import Flask
+from flask import Flask, request
 from flask_pymongo import PyMongo
 
+from environment import Environment
 
 application = Flask(__name__)
-application.config["MONGO_URI"] = os.getenv('DB_HOST')
+application.config["MONGO_URI"] = Environment.LOCAL_DB
 mongo = PyMongo(application)
 
 conversation = Conversation(mongo)
@@ -23,16 +24,27 @@ control = Control(mongo)
 def hello_world():
     return 'Hello, World!'
 
+@application.route('/chat', methods=['POST'])
+def chat():
+    print('here')
+    data = request.get_json()
+    user = video.get_current_user()
+    print(user)
+    return 'Hello, World!'
+
 
 def start_engines(bot_state, is_face_detected):
-    video_engine = Thread(target=video.start, args=(1, bot_state, is_face_detected))
-    control_engine = Thread(target=control.start, args=(2, bot_state, is_face_detected, 50))
+    control_engine = Thread(target=control.start, args=(1, bot_state, is_face_detected, 50))
+    video_engine = Thread(target=video.start)
+    conversation_engine = Thread(target=conversation.start)
 
-    conversation.start()
-    video_engine.start()
     control_engine.start()
-    video_engine.join()
+    video_engine.start()
+    conversation_engine.start()
+
     control_engine.join()
+    video_engine.join()
+    conversation_engine.join()
 
 
 def start_api(bot_state, is_face_detected):

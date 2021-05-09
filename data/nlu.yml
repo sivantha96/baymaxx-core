@@ -42,6 +42,22 @@ nlu:
     - [20](age) years
     - I am [20](age)
     - [16](age)
+    - [Twenty](age)
+    - [Ten](age)
+    - [One](age)
+    - [Two](age)
+    - [Three](age)
+    - [Sixteen](age)
+    - [Twenty](age) years old
+    - [One](age) years old
+    - [Ten](age) years old
+    - [Two](age) years old
+    - [Three](age) years old
+    - [Sixteen](age) years old
+    - I am [Twenty](age) years old
+    - I am [Sixteen](age) years old
+    - I am [Ten](age) years old
+    - I am [Three](age) years old
 - intent: inform_gender
   examples: |
     - I am a [male](gender)
